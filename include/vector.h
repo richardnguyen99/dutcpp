@@ -260,8 +260,13 @@ public:
      * %count elements. The value of all elements are the default value defined
      * by %value_type.
      */
-    explicit vector(size_type count) 
+    explicit vector(size_type count)
     {
+        // Call to value_type() will invoke the default value for value_type.
+        // For example, if value_type (Tp) is an int, calling int() will be 0.
+        // For customized object, the value_type object must support default
+        // constructor. 
+        _fill_initialize(count, value_type());
     }
 
     /**
@@ -270,8 +275,9 @@ public:
      * Same as default fill constructor. But instead of filling default value,
      * the value of filled elements is a copy of the parameter %value.
      */
-    vector (size_type count, const_reference value)
+    explicit vector (size_type count, const_reference value)
     {
+        _fill_initialize(count, value);
     }
 
     /**
@@ -306,7 +312,12 @@ public:
      * will behave just like copy constructor, but the other object can be a 
      * different class.
      */
-    template <class InputIter>
+    template <class InputIter, 
+        typename = typename ::std::enable_if<std::is_convertible<
+            typename std::iterator_traits<InputIter>::iterator_category,
+            std::input_iterator_tag
+        >::value>::type
+    >
     vector(InputIter first, InputIter last)
     {
     }
@@ -323,13 +334,23 @@ public:
 
 
 private:
+    allocator _alloc;
     pointer _start;
     pointer _finish;
     pointer _end;
 
 
 private: 
+    void _fill_initialize(size_type count, const_reference value)
+    {
+        this->_start = traits_t::allocate(_alloc, count);
+        this->_finish = this->_start;
+        this->_end = this->_start + count;
 
+        for (size_type i = 0; i < count; ++i)
+            traits_t::construct(_alloc, this->_finish++, value);
+
+    }
 };
 }
 
