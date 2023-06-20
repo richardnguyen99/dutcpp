@@ -14,6 +14,7 @@
 #include <cstddef>
 #include <memory>
 #include <initializer_list>
+#include <iterator>
 
 namespace dutcpp
 {
@@ -289,6 +290,7 @@ public:
      */
     vector(const vector& other) 
     {
+        _range_initialize(std::cbegin(other), std::cend(other));
     }
 
     /**
@@ -300,6 +302,13 @@ public:
      */
     vector(vector &&other)
     {
+        this->_start = other._start;
+        this->_finish = other._finish;
+        this->_end = other._end;
+
+        other._start = nullptr;
+        other._finish = nullptr;
+        other._end = nullptr;
     }
 
     /**
@@ -320,6 +329,11 @@ public:
     >
     vector(InputIter first, InputIter last)
     {
+        // The reason why we need to add type check on InputIter is to remove
+        // the ambiguity with the overload (size_type, value_type).
+        // This is enabled if and only if InputIter can be converted to input
+        // iterator tag defined by STD.
+        _range_initialize(first, last);
     }
 
     /**
@@ -330,6 +344,7 @@ public:
      */
     vector(std::initializer_list<value_type> init)
     {
+        _range_initialize(init.begin(), init.end());
     }
 
 
@@ -350,6 +365,18 @@ private:
         for (size_type i = 0; i < count; ++i)
             traits_t::construct(_alloc, this->_finish++, value);
 
+    }
+
+    template<class InputIter>
+    void _range_initialize(InputIter first, InputIter last)
+    {
+        size_type n = std::distance(first, last);
+        this->_start = traits_t::allocate(_alloc, n);
+        this->_finish = this->_start;
+        this->_end = this->_start + n;
+
+        for (auto it = first; it != last; ++it)
+            traits_t::construct(_alloc, this->_finish++, *it);
     }
 };
 }
