@@ -306,9 +306,9 @@ public:
         this->_finish = other._finish;
         this->_end = other._end;
 
-        other._start = nullptr;
-        other._finish = nullptr;
-        other._end = nullptr;
+        other._start = pointer();
+        other._finish = pointer();
+        other._end = pointer();
     }
 
     /**
@@ -345,6 +345,18 @@ public:
     vector(std::initializer_list<value_type> init)
     {
         _range_initialize(init.begin(), init.end());
+    }
+
+    ~vector() 
+    {
+        const difference_type n = std::distance(this->_start, this->_finish);
+
+        for (auto curr = this->_start; curr != this->_finish; ++curr)
+            // See https://stackoverflow.com/questions/14820307/when-to-use-addressofx-instead-of-x
+            traits_t::destroy(_alloc, std::addressof(*curr));
+
+        _finish = _start;
+        traits_t::deallocate(_alloc, this->_start, n);
     }
 
 

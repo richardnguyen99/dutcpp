@@ -14,7 +14,6 @@ int main(void)
 
     std::deque<int> stdvect({4,5,6,7});
     dutcpp::vector<int> v3(stdvect.begin(), stdvect.end());
-
     dutcpp::vector<int> v4(std::move(v3));
 
     return 0;
