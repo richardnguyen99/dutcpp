@@ -379,6 +379,16 @@ public:
      * vector
      */
     const_iterator 
+    begin() const
+    {
+        return const_iterator(this->_start);
+    }
+
+    /**
+     * @brief Returns a read iterator that points to the first element in the 
+     * vector
+     */
+    const_iterator 
     cbegin() const
     {
         return const_iterator(this->_start);
@@ -392,6 +402,16 @@ public:
     end()
     {
         return iterator(this->_finish);
+    }
+
+    /**
+     * @brief Returns a read iterator that points to one-past the last element
+     * in the vector
+     */
+    const_iterator 
+    end() const
+    {
+        return const_iterator(this->_finish);
     }
 
     /**
@@ -419,6 +439,16 @@ public:
      * element in the vector
      */
     const_reverse_iterator
+    rbegin() const
+    {
+        return const_reverse_iterator(cend());
+    }
+
+    /**
+     * @brief Returns a read reversed iterator that points to one-past the last
+     * element in the vector
+     */
+    const_reverse_iterator
     crbegin() const
     {
         return const_reverse_iterator(cend());
@@ -437,7 +467,16 @@ public:
     /**
      * @brief Returns a read reversed iterator that points to the first element
      * in the vector
-     * 
+     */
+    const_reverse_iterator
+    rend() const 
+    {
+        return const_reverse_iterator(cbegin());
+    }
+
+    /**
+     * @brief Returns a read reversed iterator that points to the first element
+     * in the vector
      */
     const_reverse_iterator
     crend() const 

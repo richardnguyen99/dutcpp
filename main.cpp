@@ -16,6 +16,8 @@ int main(void)
     dutcpp::vector<int> v3(stdvect.begin(), stdvect.end());
     dutcpp::vector<int> v4(std::move(v3));
 
+    dutcpp::vector<int> v5(v4);
+
     for (auto curr = v4.begin(); curr != v4.end(); curr++)
     {
         std::cout << *curr << " ";
@@ -23,6 +25,12 @@ int main(void)
     std::cout << "\n";
 
     for (auto curr = v4.rbegin(); curr != v4.rend(); ++curr)
+    {
+        std::cout << *curr << " ";
+    }
+    std::cout << "\n";
+
+    for (auto curr = v5.cbegin(); curr != v5.cend(); ++curr)
     {
         std::cout << *curr << " ";
     }
