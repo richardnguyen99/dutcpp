@@ -19,7 +19,7 @@
 namespace dutcpp
 {
 template <typename _Pointer, typename _Container>
-class normal_iterator
+class __normal_iterator
 {
 protected:
     _Pointer _current;
@@ -34,13 +34,13 @@ public:
     using reference         = typename traits_type::reference;
     using pointer           = typename traits_type::pointer;
 
-    constexpr normal_iterator() noexcept : _current(_Pointer()) {}
+    constexpr __normal_iterator() noexcept : _current(_Pointer()) {}
 
-    explicit normal_iterator(const _Pointer &_p) noexcept : _current(_p) {}
+    explicit __normal_iterator(const _Pointer &_p) noexcept : _current(_p) {}
 
     template <typename _Iter>
-    normal_iterator(
-        const normal_iterator<
+    __normal_iterator(
+        const __normal_iterator<
             _Iter, typename std::enable_if<
                         (std::is_same<
                             _Iter, typename _Container::pointer>::__value),
@@ -53,26 +53,26 @@ public:
 
     pointer operator->() const noexcept { return _current; }
 
-    normal_iterator &operator++() noexcept
+    __normal_iterator &operator++() noexcept
     {
         ++_current;
         return *this;
     }
 
-    normal_iterator operator++(int) noexcept
+    __normal_iterator operator++(int) noexcept
     {
-        return normal_iterator(_current++);
+        return __normal_iterator(_current++);
     }
 
-    normal_iterator &operator--() noexcept
+    __normal_iterator &operator--() noexcept
     {
         --_current;
         return *this;
     }
 
-    normal_iterator operator--(int) noexcept
+    __normal_iterator operator--(int) noexcept
     {
-        return normal_iterator(_current--);
+        return __normal_iterator(_current--);
     }
 
     reference operator[](difference_type pos) const noexcept
@@ -80,26 +80,26 @@ public:
         return _current[pos];
     }
 
-    normal_iterator &operator+=(difference_type n) noexcept
+    __normal_iterator &operator+=(difference_type n) noexcept
     {
         _current += n;
         return *this;
     }
 
-    normal_iterator operator+(difference_type n) const noexcept
+    __normal_iterator operator+(difference_type n) const noexcept
     {
-        return normal_iterator(_current + n);
+        return __normal_iterator(_current + n);
     }
 
-    normal_iterator &operator-=(difference_type n) noexcept
+    __normal_iterator &operator-=(difference_type n) noexcept
     {
         _current -= n;
         return *this;
     }
 
-    normal_iterator operator-(difference_type n) const noexcept
+    __normal_iterator operator-(difference_type n) const noexcept
     {
-        return normal_iterator(_current - n);
+        return ____normal_iterator(_current - n);
     }
 
     const _Pointer &base() const noexcept { return _current; }
@@ -107,123 +107,123 @@ public:
 
 template <typename _IteratorL, typename _IteratorR, typename _Container>
 inline bool
-operator==(const normal_iterator<_IteratorL, _Container> &lhs,
-            const normal_iterator<_IteratorR, _Container> &rhs) noexcept
+operator==(const __normal_iterator<_IteratorL, _Container> &lhs,
+            const __normal_iterator<_IteratorR, _Container> &rhs) noexcept
 {
     return lhs.base() == rhs.base();
 }
 
 template <typename _Iterator, typename _Container>
 inline bool
-operator==(const normal_iterator<_Iterator, _Container> &lhs,
-            const normal_iterator<_Iterator, _Container> &rhs) noexcept
+operator==(const __normal_iterator<_Iterator, _Container> &lhs,
+            const __normal_iterator<_Iterator, _Container> &rhs) noexcept
 {
     return lhs.base() == rhs.base();
 }
 
 template <typename _IteratorL, typename _IteratorR, typename _Container>
 inline bool
-operator!=(const normal_iterator<_IteratorL, _Container> &lhs,
-            const normal_iterator<_IteratorR, _Container> &rhs) noexcept
+operator!=(const __normal_iterator<_IteratorL, _Container> &lhs,
+            const __normal_iterator<_IteratorR, _Container> &rhs) noexcept
 {
     return lhs.base() != rhs.base();
 }
 
 template <typename _Iterator, typename _Container>
 inline bool
-operator!=(const normal_iterator<_Iterator, _Container> &lhs,
-            const normal_iterator<_Iterator, _Container> &rhs) noexcept
+operator!=(const __normal_iterator<_Iterator, _Container> &lhs,
+            const __normal_iterator<_Iterator, _Container> &rhs) noexcept
 {
     return lhs.base() != rhs.base();
 }
 
 template <typename _IteratorL, typename _IteratorR, typename _Container>
 inline bool
-operator<(const normal_iterator<_IteratorL, _Container> &lhs,
-            const normal_iterator<_IteratorR, _Container> &rhs) noexcept
+operator<(const __normal_iterator<_IteratorL, _Container> &lhs,
+            const __normal_iterator<_IteratorR, _Container> &rhs) noexcept
 {
     return lhs.base() < rhs.base();
 }
 
 template <typename _Iterator, typename _Container>
 inline bool
-operator<(const normal_iterator<_Iterator, _Container> &lhs,
-            const normal_iterator<_Iterator, _Container> &rhs) noexcept
+operator<(const __normal_iterator<_Iterator, _Container> &lhs,
+            const __normal_iterator<_Iterator, _Container> &rhs) noexcept
 {
     return lhs.base() < rhs.base();
 }
 
 template <typename _IteratorL, typename _IteratorR, typename _Container>
 inline bool
-operator<=(const normal_iterator<_IteratorL, _Container> &lhs,
-            const normal_iterator<_IteratorR, _Container> &rhs) noexcept
+operator<=(const __normal_iterator<_IteratorL, _Container> &lhs,
+            const __normal_iterator<_IteratorR, _Container> &rhs) noexcept
 {
     return lhs.base() <= rhs.base();
 }
 
 template <typename _Iterator, typename _Container>
 inline bool
-operator<=(const normal_iterator<_Iterator, _Container> &lhs,
-            const normal_iterator<_Iterator, _Container> &rhs) noexcept
+operator<=(const __normal_iterator<_Iterator, _Container> &lhs,
+            const __normal_iterator<_Iterator, _Container> &rhs) noexcept
 {
     return lhs.base() <= rhs.base();
 }
 
 template <typename _IteratorL, typename _IteratorR, typename _Container>
 inline bool
-operator>(const normal_iterator<_IteratorL, _Container> &lhs,
-            const normal_iterator<_IteratorR, _Container> &rhs) noexcept
+operator>(const __normal_iterator<_IteratorL, _Container> &lhs,
+            const __normal_iterator<_IteratorR, _Container> &rhs) noexcept
 {
     return lhs.base() > rhs.base();
 }
 
 template <typename _Iterator, typename _Container>
 inline bool
-operator>(const normal_iterator<_Iterator, _Container> &lhs,
-            const normal_iterator<_Iterator, _Container> &rhs) noexcept
+operator>(const __normal_iterator<_Iterator, _Container> &lhs,
+            const __normal_iterator<_Iterator, _Container> &rhs) noexcept
 {
     return lhs.base() > rhs.base();
 }
 
 template <typename _IteratorL, typename _IteratorR, typename _Container>
 inline bool
-operator>=(const normal_iterator<_IteratorL, _Container> &lhs,
-            const normal_iterator<_IteratorR, _Container> &rhs) noexcept
+operator>=(const __normal_iterator<_IteratorL, _Container> &lhs,
+            const __normal_iterator<_IteratorR, _Container> &rhs) noexcept
 {
     return lhs.base() >= rhs.base();
 }
 
 template <typename _Iterator, typename _Container>
 inline bool
-operator>=(const normal_iterator<_Iterator, _Container> &lhs,
-            const normal_iterator<_Iterator, _Container> &rhs) noexcept
+operator>=(const __normal_iterator<_Iterator, _Container> &lhs,
+            const __normal_iterator<_Iterator, _Container> &rhs) noexcept
 {
     return lhs.base() >= rhs.base();
 }
 
 template <typename _IteratorL, typename _IteratorR, typename _Container>
 inline auto
-operator-(const normal_iterator<_IteratorL, _Container> &lhs,
-            const normal_iterator<_IteratorR, _Container> &rhs) noexcept
+operator-(const __normal_iterator<_IteratorL, _Container> &lhs,
+            const __normal_iterator<_IteratorR, _Container> &rhs) noexcept
     -> decltype(lhs.base() - rhs.base())
 {
     return lhs.base() - rhs.base();
 }
 
 template <typename _Iterator, typename _Container>
-inline typename normal_iterator<_Iterator, _Container>::difference_type
-operator-(const normal_iterator<_Iterator, _Container> &lhs,
-            const normal_iterator<_Iterator, _Container> &rhs) noexcept
+inline typename __normal_iterator<_Iterator, _Container>::difference_type
+operator-(const __normal_iterator<_Iterator, _Container> &lhs,
+            const __normal_iterator<_Iterator, _Container> &rhs) noexcept
 {
     return lhs.base() - rhs.base();
 }
 
 template <typename _Iterator, typename _Container>
-inline normal_iterator<_Iterator, _Container> operator+(
-    typename normal_iterator<_Iterator, _Container>::difference_type n,
-    const normal_iterator<_Iterator, _Container>                    &i)
+inline __normal_iterator<_Iterator, _Container> operator+(
+    typename __normal_iterator<_Iterator, _Container>::difference_type n,
+    const __normal_iterator<_Iterator, _Container>                    &i)
 {
-    return normal_iterator<_Iterator, _Container>(i.base() + n);
+    return __normal_iterator<_Iterator, _Container>(i.base() + n);
 }
 
 
@@ -242,6 +242,11 @@ public:
 
     using allocator = std::allocator<Tp>;
     using traits_t = std::allocator_traits<allocator>;
+
+    using iterator = __normal_iterator<pointer, vector>;
+    using const_iterator = __normal_iterator<const_pointer, vector>;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     /**
      * @brief Default constructor
@@ -359,6 +364,86 @@ public:
         traits_t::deallocate(_alloc, this->_start, n);
     }
 
+    /**
+     * @brief Returns a read/write iterator that points to the first element in 
+     * the vector
+     */
+    iterator 
+    begin()
+    {
+        return iterator(this->_start);
+    }
+
+    /**
+     * @brief Returns a read iterator that points to the first element in the 
+     * vector
+     */
+    const_iterator 
+    cbegin() const
+    {
+        return const_iterator(this->_start);
+    }
+
+    /**
+     * @brief Returns a read/write iterator that points to one-past the last 
+     * element in the vector
+     */
+    iterator 
+    end()
+    {
+        return iterator(this->_finish);
+    }
+
+    /**
+     * @brief Returns a read iterator that points to one-past the last element
+     * in the vector
+     */
+    const_iterator 
+    cend() const
+    {
+        return const_iterator(this->_finish);
+    }
+
+    /**
+     * @brief Returns a read/write reversed iterator that points to one-past the 
+     * last element in the vector
+     */
+    reverse_iterator 
+    rbegin()
+    {
+        return reverse_iterator(end());
+    }
+
+    /**
+     * @brief Returns a read reversed iterator that points to one-past the last
+     * element in the vector
+     */
+    const_reverse_iterator
+    crbegin() const
+    {
+        return const_reverse_iterator(cend());
+    }
+
+    /**
+     * @brief Returns a read/write reversed iterator that points to the first
+     * element in the vector
+     */
+    reverse_iterator
+    rend()
+    {
+        return reverse_iterator(begin());
+    }
+
+    /**
+     * @brief Returns a read reversed iterator that points to the first element
+     * in the vector
+     * 
+     */
+    const_reverse_iterator
+    crend() const 
+    {
+        return const_reverse_iterator(cbegin());
+    }
 
 private:
     allocator _alloc;
