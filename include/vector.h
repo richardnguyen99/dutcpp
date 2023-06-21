@@ -500,6 +500,35 @@ public:
         return const_reverse_iterator(cbegin());
     }
 
+    /**
+     * @brief Checks if the vector has no element
+     */
+    _GLIBCXX_NODISCARD bool
+    empty() const
+    {
+        // Assume _start and _finish are correctly positioned, then _start ==
+        // _finish means there is no element in the vector.
+        return begin() == end();
+    }
+
+    /**
+     * @brief Returns the number of elements in the vector
+     */
+    size_type
+    size() const
+    {
+        return std::distance(begin(), end());
+    }
+
+    /**
+     * @brief Returns the capacity of elements in the vector
+     */
+    size_type
+    capacity() const
+    {
+        return this->_end - this->_start;
+    }
+
 private:
     allocator _alloc;
     pointer _start;
