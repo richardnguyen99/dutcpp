@@ -106,18 +106,24 @@ IfMacros:
 - KJ_IF_MAYBE
 IncludeBlocks:   Preserve
 IncludeCategories:
-- Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
-    Priority:        2
-    SortPriority:    0
-    CaseSensitive:   false
-- Regex:           '^(<|"(gtest|gmock|isl|json)/)'
-    Priority:        3
-    SortPriority:    0
-    CaseSensitive:   false
-- Regex:           '.*'
-    Priority:        1
-    SortPriority:    0
-    CaseSensitive:   false
+
+# - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
+
+    # #Priority:        2
+    # #SortPriority:    0
+    # #CaseSensitive:   false
+
+# - Regex:           '^(<|"(gtest|gmock|isl|json)/)'
+
+    # Priority:        3
+    # SortPriority:    0
+    # CaseSensitive:   false
+
+# - Regex:           '.*'
+
+    # Priority:        1
+    # SortPriority:    0
+    # CaseSensitive:   false
 IncludeIsMainRegex: '(Test)?$'
 IncludeIsMainSourceRegex: ''
 IndentAccessModifiers: false
@@ -202,6 +208,7 @@ SpaceBeforeSquareBrackets: false
 BitFieldColonSpacing: Both
 Standard:        Latest
 StatementAttributeLikeMacros:
+
 - Q_EMIT
 StatementMacros:
 - Q_UNUSED
