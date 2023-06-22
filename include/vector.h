@@ -38,14 +38,11 @@ public:
 
     explicit __normal_iterator(const _Pointer &_p) noexcept : _current(_p) { }
 
-    template <typename _Iter>
-    __normal_iterator(
-        const __normal_iterator<
-            _Iter,
-            typename std::enable_if<
-                (std::is_same<_Iter, typename _Container::pointer>::__value),
-                _Container>::__type> &_i) noexcept
-    : _current(_i._current)
+    template <typename _Iter,
+              typename = typename std::enable_if<
+                  std::is_convertible<_Iter, _Pointer>::value, void>::type>
+    __normal_iterator(const __normal_iterator<_Iter, _Container> &_i) noexcept
+    : _current(_i.base())
     {
     }
 
@@ -251,7 +248,8 @@ template <typename Tp>
 class vector
 {
 public:
-    // Define types for consistency
+    // Define types for consistency. STL sometimes uses some parts of member
+    // types for type checking. However, these are solely for readability.
     using value_type      = Tp;
     using reference       = Tp &;
     using const_reference = const Tp &;
@@ -529,11 +527,72 @@ public:
         return this->_end - this->_start;
     }
 
+    /**
+     * @brief Destroys all elements in this vector
+     *
+     * After calling this method, size() == 0 and capacity() will remain
+     * unchanged.
+     */
+    void
+    clear() noexcept
+    {
+        if (size() <= 0)
+            return;
+
+        for (auto curr = begin(); curr != end(); ++curr)
+            // See
+            // https://stackoverflow.com/questions/14820307/when-to-use-addressofx-instead-of-x
+            traits_t::destroy(_alloc, std::addressof(*curr));
+
+        this->_finish = this->_start;
+    }
+
+    iterator
+    insert(const_iterator pos, const_reference value)
+    {
+        const size_type n  = pos - begin();
+        const auto new_pos = begin() + (pos - cbegin());
+
+        // Enough space?
+        if (_finish != _end)
+        {
+            // Insert back?
+            if (pos == cend())
+            {
+                traits_t::construct(_alloc, _finish, value);
+                ++_finish;
+            }
+            // Shifting needed
+            else
+                _shift_insert(new_pos, value);
+        }
+        // Reallocation needed
+        else
+        {
+            _realloc_insert(new_pos, value);
+        }
+
+        return iterator(_start + n);
+    }
+
 private:
     allocator _alloc;
     pointer _start;
     pointer _finish;
     pointer _end;
+
+    size_type
+    _check_len(size_type n, const char *s) const
+    {
+        if (traits_t::max_size(_alloc) - size() < n)
+            std::__throw_length_error("New size exceeds max_size()");
+
+        const size_type len = size() + std::max(size(), n);
+
+        return (len < size() || len > traits_t::max_size(_alloc))
+                   ? traits_t::max_size(_alloc)
+                   : len;
+    }
 
 private:
     void
@@ -558,6 +617,120 @@ private:
 
         for (auto it = first; it != last; ++it)
             traits_t::construct(_alloc, this->_finish++, *it);
+    }
+
+    template <typename Arg>
+    void
+    _shift_insert(const_iterator pos, Arg &&arg)
+    {
+        // Using Arg template for forwarding for all types of passing (values,
+        // reference, remove value).
+
+        const auto new_pos = begin() + (pos - cbegin());
+
+        // Shift the last element to the right
+        // ---------------------------------------------                      //
+        // | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | x | x | x |                      //
+        // ---------------------------------------------                      //
+        //                      v
+        //                                       _f
+        // ---------------------------------------------                      //
+        // | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 7 | x | x |                      //
+        // ---------------------------------------------                      //
+        traits_t::construct(_alloc, std::addressof(*_finish),
+                            std::move(*(_finish - 1)));
+        ++_finish;
+
+        //                   f           l   e   _f
+        // ---------------------------------------------                      //
+        // | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 7 | x | x |                      //
+        // ---------------------------------------------                      //
+        pointer first = new_pos.base(); // First to shift
+        pointer last  = _finish - 2;    // Last to shift
+        pointer end   = _finish - 1;    // One-past last
+
+        //                 f = l e              _f
+        // ---------------------------------------------                      //
+        // | 0 | 1 | 2 | 3 | 4 | 4 | 5 | 6 | 7 | x | x |                      //
+        // ---------------------------------------------                      //
+        while (first != last)
+            *(--end) = *(--last);
+
+        //                   f
+        // ---------------------------------------------                      //
+        // | 0 | 1 | 2 | 3 | a | 4 | 5 | 6 | 7 | x | x |                      //
+        // ---------------------------------------------                      //
+        *new_pos = std::forward<Arg>(arg);
+    }
+
+    template <typename Arg>
+    void
+    _realloc_insert(iterator pos, Arg arg)
+    {
+
+        pointer old_start  = this->_start;
+        pointer old_finish = this->_finish;
+        pointer old_end    = this->_end;
+
+        //                   x
+        //                   v
+        // -----------------------------------------                          //
+        // | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |                          //
+        // -----------------------------------------                          //
+
+        // Allocate a new array
+        const size_type new_len = _check_len(1, "vector::insert");
+        pointer new_start       = traits_t::allocate(_alloc, new_len);
+        pointer new_finish      = pointer();
+
+        const difference_type n = pos - begin();
+
+        // (1)                                                                //
+        // ---------------------------------------------                      //
+        // | ? | ? | ? | ? | x | ? | ? | ? | ? | ? | ? |                      //
+        // ---------------------------------------------                      //
+        // (2)                                                                //
+        // ---------------------------------------------                      //
+        // | 0 | 1 | 2 | 3 | x | ? | ? | ? | ? | ? | ? |                      //
+        // ---------------------------------------------                      //
+        // (3)                                                                //
+        // ---------------------------------------------                      //
+        // | 0 | 1 | 2 | 3 | x | 4 | 5 | 6 | 7 | 8 | 9 |                      //
+        // ---------------------------------------------                      //
+        try
+        {
+            // Construct first to accomodate catch block if there is an error
+
+            // (1)
+            traits_t::construct(_alloc, new_start + n, std::forward<Arg>(arg));
+
+            // (2)
+            new_finish =
+                std::uninitialized_move(old_start, pos.base(), new_start);
+            ++new_finish;
+
+            // (3)
+            new_finish =
+                std::uninitialized_move(pos.base(), old_finish, new_finish);
+        }
+        catch (...)
+        {
+            if (!new_finish)
+                traits_t::destroy(_alloc, new_start + n);
+            else
+                for (auto curr = new_start; curr != new_finish; curr++)
+                    traits_t::destroy(_alloc, std::addressof(*curr));
+
+            traits_t::deallocate(_alloc, new_start, new_len);
+        }
+
+        for (pointer curr = old_start; curr != old_finish; curr++)
+            traits_t::destroy(_alloc, std::addressof(*curr));
+        traits_t::deallocate(_alloc, old_start, _end - old_start);
+
+        this->_start  = new_start;
+        this->_finish = new_finish;
+        this->_end    = new_start + new_len;
     }
 };
 } // namespace dutcpp
